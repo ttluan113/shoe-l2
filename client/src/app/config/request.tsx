@@ -12,6 +12,16 @@ export const requestRegister = async (user: any) => {
     return res.data;
 };
 
+export const requestLogin = async (user: any) => {
+    const res = await request.post('/api/users/login', user);
+    return res.data;
+};
+
+export const requestAuth = async () => {
+    const res = await apiClient.get('/api/users/auth');
+    return res.data;
+};
+
 export const requestRefreshToken = async () => {
     const res = await request.get('/api/users/refresh-token');
     return res.data;

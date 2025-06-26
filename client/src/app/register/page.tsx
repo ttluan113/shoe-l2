@@ -8,18 +8,24 @@ import Link from 'next/link';
 import { ToastContainer, toast } from 'react-toastify';
 
 import { requestRegister } from '../config/request';
+import { useRouter } from 'next/navigation';
 
 const { Title } = Typography;
 
 function Register() {
     const [loading, setLoading] = useState(false);
 
+    const router = useRouter();
+
     const onFinish = async (values: any) => {
         try {
             setLoading(true);
             const res = await requestRegister(values);
-            console.log(res);
-            toast.success('Đăng ký thành công');
+            toast.success(res.message);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            router.push('/login');
         } catch (error: any) {
             toast.error(error.response.data.message);
         } finally {

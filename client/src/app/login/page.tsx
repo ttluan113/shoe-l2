@@ -6,23 +6,35 @@ import { Form, Input, Button, Card, Typography, Checkbox } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 
 import Link from 'next/link';
+import { requestLogin } from '../config/request';
+import { toast, ToastContainer } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 const { Title } = Typography;
 
 function Login() {
     const [loading, setLoading] = useState(false);
 
-    const onFinish = (values: any) => {
+    const router = useRouter();
+
+    const onFinish = async (values: any) => {
         setLoading(true);
-        console.log('Login values:', values);
-        // Here you would implement the API call to login
-        setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+        try {
+            const res = await requestLogin(values);
+            toast.success(res.message);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            router.push('/');
+        } catch (error: any) {
+            toast.error(error.response.data.message);
+        }
+        setLoading(false);
     };
 
     return (
         <div>
+            <ToastContainer />
             <header>
                 <Header />
             </header>

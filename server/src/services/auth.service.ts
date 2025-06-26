@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as crypto from 'crypto';
+import { jwtDecode } from 'jwt-decode';
 
 import { apiKey, apiKeyDocument } from '../modules/users/schemas/apiKey.schema';
+
+interface DecodedToken {
+  id: string;
+  email: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -62,13 +68,21 @@ export class AuthService {
     });
   }
 
-  async verifyToken(token: string, userId: string) {
-    const key = await this.apiKeyModel.findOne({ user: userId });
-    if (!key) throw new Error('Không tìm thấy khóa của user');
+  async verifyToken(token: string) {
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      const findApiKey = await this.apiKeyModel.findOne({ userId: decoded.id });
 
-    return this.jwtService.verify(token, {
-      algorithms: ['RS256'],
-      publicKey: key.publicKey,
-    });
+      if (!findApiKey) {
+        throw new UnauthorizedException('Vui lòng đăng nhập lại');
+      }
+
+      return this.jwtService.verify(token, {
+        secret: findApiKey.publicKey,
+        algorithms: ['RS256'],
+      });
+    } catch (error) {
+      throw new UnauthorizedException('Vui lòng đăng nhập lại');
+    }
   }
 }

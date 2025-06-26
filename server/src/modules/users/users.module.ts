@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 
@@ -9,6 +9,7 @@ import { UsersService } from './users.service';
 import { AuthService } from 'src/services/auth.service';
 
 import * as dotenv from 'dotenv';
+import { AuthMiddleware } from 'src/middleware/auth.middleware';
 
 dotenv.config();
 
@@ -23,4 +24,8 @@ dotenv.config();
   controllers: [UsersController],
   providers: [UsersService, AuthService],
 })
-export class UsersModule {}
+export class UsersModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('/api/users/auth');
+  }
+}
